@@ -8,6 +8,7 @@ public class CharacterInfo
     public byte BirthMonth { get; set; }
     public byte BirthDate { get; set; }
     public string? CardId { get; set; }
+    public string? LoginUserKey { get; set; }
 
     public bool IsValid()
         => CharacterName != null
