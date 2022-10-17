@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 using Shipwreck.PrimagiBrowser.Models;
 using Shipwreck.PrimagiBrowser.Properties;
 
@@ -60,11 +61,43 @@ public sealed class CharacterTabViewModel : TabViewModelBase
         Debug.WriteLine(uri);
         if (uri == "https://primagi.jp/mypage/api/myphotolist/")
         {
-            Debug.WriteLine(responseContent);
+            var res = JsonConvert.DeserializeObject<ApiResponse<PhotoDataListData>>(responseContent);
+
+            if (res?.IsSuccessful() == true
+                && res.Data?.PhotoDataList?.Length >= 0)
+            {
+                Debug.WriteLine("Got {0} photo", res.Data.PhotoDataList.Length);
+            }
         }
         else if (uri == "https://primagi.jp/mypage/api/itemlist/")
         {
-            Debug.WriteLine(responseContent);
+            var res = JsonConvert.DeserializeObject<ApiResponse<ItemListData>>(responseContent);
+
+            if (res?.IsSuccessful() == true
+                && res.Data?.ItemList?.Length >= 0)
+            {
+                Debug.WriteLine("Got {0} items", res.Data.ItemList.Length);
+            }
+        }
+        else if (uri == "https://primagi.jp/mypage/api/friendlist/")
+        {
+            var res = JsonConvert.DeserializeObject<ApiResponse<FriendListData>>(responseContent);
+
+            if (res?.IsSuccessful() == true
+                && res.Data?.FriendList?.Length >= 0)
+            {
+                Debug.WriteLine("Got {0} friends", res.Data.FriendList.Length);
+            }
+        }
+        else if (uri == "https://primagi.jp/mypage/api/promofriend/")
+        {
+            var res = JsonConvert.DeserializeObject<ApiResponse<PromoFriendListData>>(responseContent);
+
+            if (res?.IsSuccessful() == true
+                && res.Data?.PromoFriendList?.Length >= 0)
+            {
+                Debug.WriteLine("Got {0} promo friends", res.Data.PromoFriendList.Length);
+            }
         }
     }
 }

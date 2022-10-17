@@ -66,8 +66,7 @@ $('form').submit();");
             {
                 ViewModel?.HandleLoginResponse(e.Response.Headers);
             }
-            else if (e.Request.Method == "POST"
-                && e.Request.Uri.StartsWith("https://primagi.jp/mypage/api/"))
+            else if (e.Request.Uri.StartsWith("https://primagi.jp/mypage/api/"))
             {
                 string? pc = null;
                 //var ps = e.Request.Content;
