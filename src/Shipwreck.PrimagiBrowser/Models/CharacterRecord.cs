@@ -1,13 +1,27 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.RegularExpressions;
 
 namespace Shipwreck.PrimagiBrowser.Models;
 
-public class CharacterInfo
+public class CharacterRecord
 {
-    public string? CharacterName { get; set; }
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int Id { get; set; }
+
+    [Required]
+    [StringLength(6)]
+    public string CharacterName { get; set; } = string.Empty;
+
     public byte BirthMonth { get; set; }
+
     public byte BirthDate { get; set; }
-    public string? CardId { get; set; }
+
+    [Required]
+    [StringLength(15)]
+    public string CardId { get; set; } = string.Empty;
+
     public string? LoginUserKey { get; set; }
 
     public bool IsValid()

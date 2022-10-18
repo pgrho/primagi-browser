@@ -1,5 +1,4 @@
 ﻿using Shipwreck.PrimagiBrowser.Models;
-using Shipwreck.PrimagiBrowser.Properties;
 using Shipwreck.ViewModelUtils;
 
 namespace Shipwreck.PrimagiBrowser.ViewModels;
@@ -66,9 +65,9 @@ public sealed class AddNewTabViewModel : TabViewModelBase
     public CommandViewModelBase AddCommand
         => _AddCommand ??= CommandViewModel.Create(Add);
 
-    public void Add()
+    public async void Add()
     {
-        var c = new CharacterInfo
+        var c = new CharacterRecord
         {
             CharacterName = CharacterName,
             BirthMonth = BirthMonth,
@@ -78,19 +77,21 @@ public sealed class AddNewTabViewModel : TabViewModelBase
 
         if (!c.IsValid())
         {
-            Window.ShowErrorToastAsync("Invalid Parameter");
+            await Window.ShowErrorToastAsync("Invalid Parameter");
             return;
         }
 
         if (Window.Tabs.OfType<CharacterTabViewModel>().Any(e => e.CardId == c.CardId))
         {
-            Window.ShowErrorToastAsync("Duplicate CardId");
+            await Window.ShowErrorToastAsync("Duplicate CardId");
             return;
         }
 
-        var sd = Settings.Default;
-        sd.SetCharacterInfo(sd.GetCharacterInfo().Append(c));
-        sd.Save();
+        using (var db = await BrowserDbContext.CreateDbAsync())
+        {
+            db.Characters!.Add(c);
+            await db.SaveChangesAsync();
+        }
 
         var t = new CharacterTabViewModel(Window, c);
         Window.Tabs.Insert(Window.Tabs.Count - 1, t);

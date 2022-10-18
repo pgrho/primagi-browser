@@ -1,43 +1,46 @@
 ﻿using System.Diagnostics;
 using System.Text.RegularExpressions;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Shipwreck.PrimagiBrowser.Models;
-using Shipwreck.PrimagiBrowser.Properties;
 
 namespace Shipwreck.PrimagiBrowser.ViewModels;
 
 public sealed class CharacterTabViewModel : TabViewModelBase
 {
-    public CharacterTabViewModel(MainWindowViewModel window, CharacterInfo character)
+    public CharacterTabViewModel(MainWindowViewModel window, CharacterRecord character)
         : base(window, $"{character.CharacterName}")
     {
+        _Id = character.Id;
         CharacterName = character.CharacterName ?? throw new ArgumentException();
         BirthMonth = character.BirthMonth;
         BirthDate = character.BirthDate;
         CardId = character.CardId ?? throw new ArgumentException();
     }
 
+    private readonly int _Id;
     public string CharacterName { get; }
     public byte BirthMonth { get; }
     public byte BirthDate { get; }
     internal readonly string CardId;
     private string? _LoginUserKey;
 
-    public void HandleLoginResponse(IEnumerable<KeyValuePair<string, string>> responseHeaders)
+    public async void HandleLoginResponse(IEnumerable<KeyValuePair<string, string>> responseHeaders)
     {
         var luk = GetLoginUserKey(responseHeaders);
 
         if (luk != null)
         {
             _LoginUserKey = luk;
-            var sd = Settings.Default;
-            var cs = sd.GetCharacterInfo().ToList();
-            var c = cs.FirstOrDefault(e => e.CardId == CardId);
-            if (c != null && c.LoginUserKey != luk)
+
+            using (var db = await BrowserDbContext.CreateDbAsync())
             {
-                c.LoginUserKey = luk;
-                sd.SetCharacterInfo(cs);
-                sd.Save();
+                var c = await db.Characters!.FirstOrDefaultAsync(e => e.Id == _Id && e.LoginUserKey != luk);
+                if (c != null)
+                {
+                    c.LoginUserKey = luk;
+                    await db.SaveChangesAsync();
+                }
             }
         }
     }

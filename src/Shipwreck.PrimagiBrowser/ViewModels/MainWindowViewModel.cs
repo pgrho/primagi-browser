@@ -1,4 +1,5 @@
-﻿using Shipwreck.PrimagiBrowser.Properties;
+﻿using Microsoft.EntityFrameworkCore;
+using Shipwreck.PrimagiBrowser.Models;
 using Shipwreck.ViewModelUtils;
 
 namespace Shipwreck.PrimagiBrowser.ViewModels;
@@ -15,16 +16,24 @@ public sealed class MainWindowViewModel : WindowViewModel
         {
             if (_Tabs == null)
             {
-                _Tabs = new BulkUpdateableCollection<TabViewModelBase>();
-
-                foreach (var c in Settings.Default.GetCharacterInfo())
+                _Tabs = new BulkUpdateableCollection<TabViewModelBase>
                 {
-                    _Tabs.Add(new CharacterTabViewModel(this, c));
-                }
+                    new AddNewTabViewModel(this)
+                };
 
-                _Tabs.Add(new AddNewTabViewModel(this));
+                BeginLoadCharacters();
             }
             return _Tabs;
+        }
+    }
+
+    private async void BeginLoadCharacters()
+    {
+        using var db = await BrowserDbContext.CreateDbAsync();
+        var i = 0;
+        foreach (var c in await db.Characters!.OrderBy(e => e.Id).ToListAsync())
+        {
+            _Tabs?.Insert(i++, new CharacterTabViewModel(this, c));
         }
     }
 
