@@ -22,7 +22,7 @@ public partial class CharacterTab
         if (ViewModel is CharacterTabViewModel vm
             && webView.Source == null)
         {
-            var udc = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), typeof(App)!.Namespace, "UserData", vm.CardId);
+            var udc = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), typeof(App).Namespace!, "UserData", vm.CardId);
 
             if (!Directory.Exists(udc))
             {
@@ -61,10 +61,18 @@ $('form').submit();");
     {
         try
         {
+            Debug.WriteLine($"{e.Request.Method} {e.Request.Uri} {e.Response.StatusCode}");
+
             if (e.Request.Method == "POST"
                 && e.Request.Uri == "https://primagi.jp/mypage/login/")
             {
                 ViewModel?.HandleLoginResponse(e.Response.Headers);
+            }
+            else if (e.Request.Method == "GET"
+                && e.Request.Uri == "https://primagi.jp/mypage/"
+                && e.Response.StatusCode == 200)
+            {
+                ViewModel?.HandleLoginResponse(e.Request.Headers);
             }
             else if (e.Request.Uri.StartsWith("https://primagi.jp/mypage/api/"))
             {

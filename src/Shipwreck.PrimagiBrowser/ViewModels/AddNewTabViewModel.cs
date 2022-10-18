@@ -94,7 +94,7 @@ public sealed class AddNewTabViewModel : TabViewModelBase
         }
 
         var t = new CharacterTabViewModel(Window, c);
-        Window.Tabs.Insert(Window.Tabs.Count - 1, t);
+        Window.Tabs.Insert(Window.Tabs.IndexOf(this), t);
         Window.SelectedTab = t;
     }
 

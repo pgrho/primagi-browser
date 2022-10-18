@@ -53,7 +53,7 @@ public sealed class CharacterTabViewModel : TabViewModelBase
                     && m.Success ? m.Groups[1].Value : null).FirstOrDefault(e => e != null);
     }
 
-    public void HandleApiResponse(string uri, IEnumerable<KeyValuePair<string, string>> requestHeaders, string? requestContent, string responseContent)
+    public async void HandleApiResponse(string uri, IEnumerable<KeyValuePair<string, string>> requestHeaders, string? requestContent, string responseContent)
     {
         var luk = GetLoginUserKey(requestHeaders);
         if (luk != _LoginUserKey)
@@ -70,6 +70,40 @@ public sealed class CharacterTabViewModel : TabViewModelBase
                 && res.Data?.PhotoDataList?.Length >= 0)
             {
                 Debug.WriteLine("Got {0} photo", res.Data.PhotoDataList.Length);
+
+                var seqs = res.Data.PhotoDataList.Select(e => e.PhotoSeq);
+
+                using var db = await BrowserDbContext.CreateDbAsync();
+
+                var es = await db.Photo!.Where(e => e.CharacterId == _Id && seqs.Contains(e.Seq)).Select(e => e.Seq).ToListAsync();
+
+                var newItems = new List<PhotoRecord>();
+
+                foreach (var p in res.Data.PhotoDataList)
+                {
+                    if (p.PhotoSeq != null
+                        && p.ImageUrl != null
+                        && p.ThumbUrl != null
+                        && !es.Contains(p.PhotoSeq))
+                    {
+                        newItems.Add(new PhotoRecord
+                        {
+                            CharacterId = _Id,
+                            Seq = p.PhotoSeq,
+                            PlayDate = p.PlayDate,
+                            ImageUrl = p.ImageUrl,
+                            ThumbUrl = p.ThumbUrl,
+                        });
+                    }
+                }
+
+                if (newItems.Any())
+                {
+                    db.Photo!.AddRange(newItems);
+                    await db.SaveChangesAsync();
+
+                    Window.PhotoList.Enqueue(newItems);
+                }
             }
         }
         else if (uri == "https://primagi.jp/mypage/api/itemlist/")

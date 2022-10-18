@@ -13,27 +13,42 @@
     Height="720"
     Width="1280"
     d:DataContext="{d:DesignInstance Type=vm:MainWindowViewModel, IsDesignTimeCreatable=False}">
-    <mah:MetroTabControl
-        KeepVisualTreeInMemoryWhenChangingTabs="True"
-        ItemsSource="{Binding Tabs}"
-        SelectedItem="{Binding SelectedTab}">
-        <TabControl.ItemTemplate>
-            <DataTemplate>
-                <TextBlock
-                    Text="{Binding Title}" />
-            </DataTemplate>
-        </TabControl.ItemTemplate>
-        <TabControl.ContentTemplateSelector>
-            <vmu:DataTemplateSelector>
-                <DataTemplate
-                    x:Key="{x:Type vm:CharacterTabViewModel}">
-                    <v:CharacterTab />
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition
+                Height="Auto" />
+        </Grid.RowDefinitions>
+        <mah:MetroTabControl
+            KeepVisualTreeInMemoryWhenChangingTabs="True"
+            ItemsSource="{Binding Tabs}"
+            SelectedItem="{Binding SelectedTab}">
+            <TabControl.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock
+                        Text="{Binding Title}" />
                 </DataTemplate>
-                <DataTemplate
-                    x:Key="{x:Type vm:AddNewTabViewModel}">
-                    <v:AddNewTab />
-                </DataTemplate>
-            </vmu:DataTemplateSelector>
-        </TabControl.ContentTemplateSelector>
-    </mah:MetroTabControl>
+            </TabControl.ItemTemplate>
+            <TabControl.ContentTemplateSelector>
+                <vmu:DataTemplateSelector>
+                    <DataTemplate
+                        x:Key="{x:Type vm:CharacterTabViewModel}">
+                        <v:CharacterTab />
+                    </DataTemplate>
+                    <DataTemplate
+                        x:Key="{x:Type vm:AddNewTabViewModel}">
+                        <v:AddNewTab />
+                    </DataTemplate>
+                    <DataTemplate
+                        x:Key="{x:Type vm:PhotoListTabViewModel}">
+                        <v:PhotoListTab />
+                    </DataTemplate>
+                </vmu:DataTemplateSelector>
+            </TabControl.ContentTemplateSelector>
+        </mah:MetroTabControl>
+        <StatusBar
+            Grid.Row="1">
+            <StatusBarItem />
+        </StatusBar>
+    </Grid>
 </vmu:FrameworkWindow>

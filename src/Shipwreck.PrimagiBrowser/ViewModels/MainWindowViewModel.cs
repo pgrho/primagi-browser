@@ -16,10 +16,7 @@ public sealed class MainWindowViewModel : WindowViewModel
         {
             if (_Tabs == null)
             {
-                _Tabs = new BulkUpdateableCollection<TabViewModelBase>
-                {
-                    new AddNewTabViewModel(this)
-                };
+                _Tabs = new() { AddNewTab, PhotoList };
 
                 BeginLoadCharacters();
             }
@@ -36,6 +33,16 @@ public sealed class MainWindowViewModel : WindowViewModel
             _Tabs?.Insert(i++, new CharacterTabViewModel(this, c));
         }
     }
+
+    private AddNewTabViewModel? _AddNewTab;
+
+    public AddNewTabViewModel AddNewTab
+        => _AddNewTab ??= new AddNewTabViewModel(this);
+
+    private PhotoListTabViewModel? _PhotoList;
+
+    public PhotoListTabViewModel PhotoList
+        => _PhotoList ??= new PhotoListTabViewModel(this);
 
     #endregion Tabs
 
