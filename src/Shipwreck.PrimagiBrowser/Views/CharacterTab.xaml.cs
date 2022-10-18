@@ -44,8 +44,9 @@ public partial class CharacterTab
 
     private void webView_NavigationCompleted(object sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationCompletedEventArgs e)
     {
+        var url = webView.Source?.ToString();
         if (ViewModel is CharacterTabViewModel vm
-            && webView.Source?.ToString() == "https://primagi.jp/mypage/login/"
+            && url == "https://primagi.jp/mypage/login/"
             && !_IsExecuted)
         {
             _IsExecuted = true;
@@ -54,6 +55,37 @@ public partial class CharacterTab
 $('input[name=""val[PlayerName]""').val('{vm.CharacterName}');
 $('input[name=""val[Birthday]""').val('{vm.BirthMonth}/{vm.BirthDate}');
 $('form').submit();");
+        }
+        else if  (url == "https://primagi.jp/mypage/myphoto/")
+        {
+            webView.ExecuteScriptAsync(@"(function(){
+let y = 2021;
+let m = 10;
+
+for(;;){
+
+    const v = (y * 100 + m).toString();
+
+    const jq = $('.selectPeriod>a[data-value=' + v + ']');
+
+    if (jq.length) {
+        return;
+    }
+
+    $('<a data-accordion-selection data-value=\''+v+'\' >'+y+'年'+m+'月</a>').insertAfter('.selectPeriod>a:nth-child(3)');
+
+    if (m===12)
+    {
+        y++;
+        m = 1;
+    }
+    else
+    {
+        m++;
+    }
+}
+
+})()");
         }
     }
 

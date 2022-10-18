@@ -44,10 +44,14 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <StackPanel>
+                        <StackPanel
+                            Margin="8">
+
                             <Image
-                                MaxWidth="128"
+                                Width="108"
+                                Height="192"
                                 Source="{Binding Thumbnail}" />
+
                             <TextBlock
                                 Text="{Binding PlayDate, StringFormat='yyyy-MM-dd HH:mm'}" />
                             <TextBlock
