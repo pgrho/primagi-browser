@@ -67,6 +67,18 @@ public class PhotoViewModel : ObservableModel
 
     #endregion Thumbnail
 
+    #region IsSelected
+
+    private bool _IsSelected;
+
+    public bool IsSelected
+    {
+        get => _IsSelected;
+        set => SetProperty(ref _IsSelected, value);
+    }
+
+    #endregion IsSelected
+
     internal void Set(PhotoRecord record)
     {
         static ImageSource? toImageSource(string? path)

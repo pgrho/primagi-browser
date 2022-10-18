@@ -28,39 +28,51 @@
                 </ComboBox.ItemTemplate>
             </ComboBox>
         </StackPanel>
-        <ScrollViewer
-            HorizontalScrollBarVisibility="Hidden"
-            VerticalScrollBarVisibility="Auto"
-            HorizontalContentAlignment="Left">
-            <ItemsControl
-                ItemsSource="{Binding PhotoList}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <WrapPanel
-                            Orientation="Horizontal"
-                            IsItemsHost="True"
-                            Width="{Binding RelativeSource={RelativeSource AncestorType=ScrollViewer}, Path=ViewportWidth}" />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel
-                            Margin="8">
+        <ListView
+            ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+            ScrollViewer.VerticalScrollBarVisibility="Auto"
+            HorizontalContentAlignment="Left"
+            ItemsSource="{Binding PhotoList}">
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel
+                        Orientation="Horizontal"
+                        IsItemsHost="True"
+                        Width="{Binding RelativeSource={RelativeSource AncestorType=ScrollViewer}, Path=ViewportWidth}" />
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
+            <ListView.ItemContainerStyle>
+                <Style
+                    TargetType="ListViewItem"
+                    BasedOn="{StaticResource MahApps.Styles.ListViewItem}">
+                    <Setter
+                        Property="IsSelected"
+                        Value="{Binding IsSelected}" />
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel
+                        Margin="8">
 
-                            <Image
-                                Width="108"
-                                Height="192"
-                                Source="{Binding Thumbnail}" />
+                        <Image
+                            Width="108"
+                            Height="192"
+                            Source="{Binding Thumbnail}" />
 
-                            <TextBlock
-                                Text="{Binding PlayDate, StringFormat='yyyy-MM-dd HH:mm'}" />
-                            <TextBlock
-                                Text="{Binding Character.Name}" />
-                        </StackPanel>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </ScrollViewer>
-
+                        <TextBlock
+                            Text="{Binding PlayDate, StringFormat='yyyy-MM-dd HH:mm'}" />
+                        <TextBlock
+                            Text="{Binding Character.Name}" />
+                    </StackPanel>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+            <ListView.InputBindings>
+                <KeyBinding
+                    Modifiers="Ctrl"
+                    Key="C"
+                    Command="{Binding CopyCommand}" />
+            </ListView.InputBindings>
+        </ListView>
     </DockPanel>
 </vmu:FrameworkUserControl>

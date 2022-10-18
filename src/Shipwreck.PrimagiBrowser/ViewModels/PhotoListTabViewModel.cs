@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
@@ -126,6 +127,34 @@ public sealed class PhotoListTabViewModel : TabViewModelBase
     }
 
     #endregion PhotoList
+
+    #region CopyCommand
+
+    private CommandViewModelBase? _CopyCommand;
+
+    public CommandViewModelBase CopyCommand
+        => _CopyCommand ??= CommandViewModel.Create(() =>
+        {
+            List<string> ps;
+            lock (PhotoList)
+            {
+#pragma warning disable CS8619 // 値における参照型の Null 許容性が、対象の型と一致しません。
+                ps = PhotoList.Select(e => e.IsSelected && e.Image is BitmapImage bmp ? bmp.UriSource?.LocalPath : null).Where(e => e != null).ToList();
+#pragma warning restore CS8619 // 値における参照型の Null 許容性が、対象の型と一致しません。
+            }
+
+            if (ps.Any())
+            {
+                var sc = new StringCollection();
+                foreach (var p in ps)
+                {
+                    sc.Add(p);
+                }
+                Clipboard.SetFileDropList(sc);
+            }
+        });
+
+    #endregion CopyCommand
 
     private readonly Queue<PhotoRecord> _DownloadQueue = new();
     private Task? _DownloadTask;
