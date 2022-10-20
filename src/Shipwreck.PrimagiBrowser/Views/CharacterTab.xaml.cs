@@ -32,6 +32,8 @@ public partial class CharacterTab
             var env = await CoreWebView2Environment.CreateAsync(null, udc);
             await webView.EnsureCoreWebView2Async(env);
 
+            webView.CoreWebView2.CookieManager.DeleteAllCookies();
+
             webView.CoreWebView2.AddWebResourceRequestedFilter("https://primagi.jp/mypage/login/", CoreWebView2WebResourceContext.All);
             webView.CoreWebView2.AddWebResourceRequestedFilter("https://primagi.jp/mypage/api/*", CoreWebView2WebResourceContext.All);
             webView.CoreWebView2.WebResourceResponseReceived += CoreWebView2_WebResourceResponseReceived;
@@ -56,7 +58,7 @@ $('input[name=""val[PlayerName]""').val('{vm.CharacterName}');
 $('input[name=""val[Birthday]""').val('{vm.BirthMonth}/{vm.BirthDate}');
 $('form').submit();");
         }
-        else if  (url == "https://primagi.jp/mypage/myphoto/")
+        else if (url == "https://primagi.jp/mypage/myphoto/")
         {
             webView.ExecuteScriptAsync(@"(function(){
 let y = 2021;

@@ -32,6 +32,9 @@ public sealed class MainWindowViewModel : WindowViewModel
         {
             _Tabs?.Insert(i++, new CharacterTabViewModel(this, c));
         }
+
+        SelectedTab = (_SelectedTab == null || SelectedTab is AddNewTabViewModel at && at.IsEmpty())
+            && Tabs.OfType<CharacterTabViewModel>().Any() ? PhotoList : AddNewTab;
     }
 
     private AddNewTabViewModel? _AddNewTab;

@@ -99,4 +99,10 @@ public sealed class AddNewTabViewModel : TabViewModelBase
     }
 
     #endregion AddCommand
+
+    public bool IsEmpty()
+        => string.IsNullOrEmpty(CharacterName) 
+        && BirthMonth == 1 
+        && BirthDate == 1 
+        && string.IsNullOrEmpty(CardId);
 }
