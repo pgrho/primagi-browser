@@ -1,4 +1,5 @@
-﻿using Shipwreck.PrimagiBrowser.Models;
+﻿using System.Diagnostics;
+using Shipwreck.PrimagiBrowser.Models;
 using Shipwreck.ViewModelUtils;
 
 namespace Shipwreck.PrimagiBrowser.ViewModels;
@@ -98,5 +99,20 @@ public class PhotoViewModel : ObservableModel
         PlayDate = record.PlayDate;
         Image = toImageSource(record.ImagePath);
         Thumbnail = toImageSource(record.ThumbPath);
+    }
+
+    public void Open()
+    {
+        if (Image is BitmapImage bmp && bmp.UriSource?.Scheme == Uri.UriSchemeFile)
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo(bmp.UriSource.LocalPath)
+                {
+                    UseShellExecute = true
+                });
+            }
+            catch { }
+        }
     }
 }

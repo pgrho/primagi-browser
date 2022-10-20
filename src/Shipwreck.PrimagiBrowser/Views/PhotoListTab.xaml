@@ -32,7 +32,8 @@
             ScrollViewer.HorizontalScrollBarVisibility="Hidden"
             ScrollViewer.VerticalScrollBarVisibility="Auto"
             HorizontalContentAlignment="Left"
-            ItemsSource="{Binding PhotoList}">
+            ItemsSource="{Binding PhotoList}"
+            MouseDoubleClick="ListView_MouseDoubleClick">
             <ListView.ItemsPanel>
                 <ItemsPanelTemplate>
                     <WrapPanel
