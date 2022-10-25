@@ -18,9 +18,9 @@ public sealed class PhotoListTabViewModel : TabViewModelBase
 
     #region Months
 
-    private ReadOnlyCollection<DateOnly>? _Months;
+    private ReadOnlyCollection<PhotoListMonthViewModel>? _Months;
 
-    public ReadOnlyCollection<DateOnly> Months
+    public ReadOnlyCollection<PhotoListMonthViewModel> Months
         => _Months ??= Array.AsReadOnly(
             Enumerable.Range(0, int.MaxValue)
             .Select(e =>
@@ -30,6 +30,7 @@ public sealed class PhotoListTabViewModel : TabViewModelBase
                 return DateOnly.FromDateTime(td.AddMonths(-e));
             })
             .TakeWhile(e => e >= new DateOnly(2021, 10, 1))
+            .Select(e => new PhotoListMonthViewModel(this, e))
             .ToArray());
 
     #endregion Months
@@ -42,9 +43,9 @@ public sealed class PhotoListTabViewModel : TabViewModelBase
     {
         get
         {
-            if (!Months.Contains(_SelectedMonth))
+            if (!Months.Any(e => e.StartDate == _SelectedMonth))
             {
-                _SelectedMonth = Months[0];
+                _SelectedMonth = Months[0].StartDate;
             }
             return _SelectedMonth;
         }
