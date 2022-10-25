@@ -52,20 +52,21 @@ public partial class CharacterTab
             && !_IsExecuted)
         {
             _IsExecuted = true;
-            webView.ExecuteScriptAsync(
-                @$"$('input[name=""val[ProfileCardID]""').val('{vm.CardId}');
-$('input[name=""val[PlayerName]""').val('{vm.CharacterName}');
-$('input[name=""val[Birthday]""').val('{vm.BirthMonth}/{vm.BirthDate}');
-$('form').submit();");
+            webView.ExecuteScriptAsync(CreateLoginScript(vm));
         }
         else if (url == "https://primagi.jp/mypage/myphoto/")
         {
-            webView.ExecuteScriptAsync(@"(function(){
+            webView.ExecuteScriptAsync(CreateMyPhotoDropdownScript());
+        }
+    }
+
+    private static string CreateMyPhotoDropdownScript()
+    {
+        return @"(function(){
 let y = 2021;
 let m = 10;
 
 for(;;){
-
     const v = (y * 100 + m).toString();
 
     const jq = $('.selectPeriod>a[data-value=' + v + ']');
@@ -86,9 +87,15 @@ for(;;){
         m++;
     }
 }
+})()";
+    }
 
-})()");
-        }
+    private static string CreateLoginScript(CharacterTabViewModel vm)
+    {
+        return @$"$('input[name=""val[ProfileCardID]""').val('{vm.CardId}');
+$('input[name=""val[PlayerName]""').val('{vm.CharacterName}');
+$('input[name=""val[Birthday]""').val('{vm.BirthMonth}/{vm.BirthDate}');
+$('form').submit();";
     }
 
     private async void CoreWebView2_WebResourceResponseReceived(object? sender, CoreWebView2WebResourceResponseReceivedEventArgs e)

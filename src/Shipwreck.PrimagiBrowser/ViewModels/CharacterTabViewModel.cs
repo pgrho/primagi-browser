@@ -71,39 +71,7 @@ public sealed class CharacterTabViewModel : TabViewModelBase
             {
                 Debug.WriteLine("Got {0} photo", res.Data.PhotoDataList.Length);
 
-                var seqs = res.Data.PhotoDataList.Select(e => e.PhotoSeq);
-
-                using var db = await BrowserDbContext.CreateDbAsync();
-
-                var es = await db.Photo!.Where(e => e.CharacterId == _Id && seqs.Contains(e.Seq)).Select(e => e.Seq).ToListAsync();
-
-                var newItems = new List<PhotoRecord>();
-
-                foreach (var p in res.Data.PhotoDataList)
-                {
-                    if (p.PhotoSeq != null
-                        && p.ImageUrl != null
-                        && p.ThumbUrl != null
-                        && !es.Contains(p.PhotoSeq))
-                    {
-                        newItems.Add(new PhotoRecord
-                        {
-                            CharacterId = _Id,
-                            Seq = p.PhotoSeq,
-                            PlayDate = p.PlayDate,
-                            ImageUrl = p.ImageUrl,
-                            ThumbUrl = p.ThumbUrl,
-                        });
-                    }
-                }
-
-                if (newItems.Any())
-                {
-                    db.Photo!.AddRange(newItems);
-                    await db.SaveChangesAsync();
-
-                    Window.PhotoList.Enqueue(newItems);
-                }
+                await HandlePhotoDataListAsync(requestHeaders, res);
             }
         }
         else if (uri == "https://primagi.jp/mypage/api/itemlist/")
@@ -136,5 +104,49 @@ public sealed class CharacterTabViewModel : TabViewModelBase
                 Debug.WriteLine("Got {0} promo friends", res.Data.PromoFriendList.Length);
             }
         }
+    }
+
+    internal async Task<List<PhotoRecord>> HandlePhotoDataListAsync(IEnumerable<KeyValuePair<string, string>> requestHeaders, ApiResponse<PhotoDataListData> res)
+    {
+        var luk = GetLoginUserKey(requestHeaders);
+        if (luk != _LoginUserKey)
+        {
+            return new(0);
+        }
+
+        var seqs = res.Data!.PhotoDataList!.Select(e => e.PhotoSeq);
+        using var db = await BrowserDbContext.CreateDbAsync();
+
+        var es = await db.Photo!.Where(e => e.CharacterId == _Id && seqs.Contains(e.Seq)).Select(e => e.Seq).ToListAsync();
+
+        var newItems = new List<PhotoRecord>();
+
+        foreach (var p in res.Data.PhotoDataList)
+        {
+            if (p.PhotoSeq != null
+                && p.ImageUrl != null
+                && p.ThumbUrl != null
+                && !es.Contains(p.PhotoSeq))
+            {
+                newItems.Add(new PhotoRecord
+                {
+                    CharacterId = _Id,
+                    Seq = p.PhotoSeq,
+                    PlayDate = p.PlayDate,
+                    ImageUrl = p.ImageUrl,
+                    ThumbUrl = p.ThumbUrl,
+                });
+            }
+        }
+
+        if (newItems.Any())
+        {
+            db.Photo!.AddRange(newItems);
+            await db.SaveChangesAsync();
+
+            Window.PhotoList.Enqueue(newItems);
+        }
+
+        return newItems;
     }
 }
