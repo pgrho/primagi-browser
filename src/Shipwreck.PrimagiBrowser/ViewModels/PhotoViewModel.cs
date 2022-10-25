@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.IO;
 using Shipwreck.PrimagiBrowser.Models;
 using Shipwreck.ViewModelUtils;
 
@@ -84,7 +85,7 @@ public class PhotoViewModel : ObservableModel
     {
         static ImageSource? toImageSource(string? path)
         {
-            if (path == null)
+            if (path == null || !File.Exists(path))
             {
                 return null;
             }

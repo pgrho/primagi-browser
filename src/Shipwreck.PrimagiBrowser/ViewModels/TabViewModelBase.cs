@@ -23,4 +23,28 @@ public abstract class TabViewModelBase : ObservableModel
     }
 
     #endregion Title
+
+    #region LeftText
+
+    private string _LeftText = " ";
+
+    public string LeftText
+    {
+        get => _LeftText;
+        protected set => SetProperty(ref _LeftText, string.IsNullOrWhiteSpace(value) ? " " : value);
+    }
+
+    #endregion LeftText
+
+    #region RightText
+
+    private string _RightText = " ";
+
+    public string RightText
+    {
+        get => _RightText;
+        protected set => SetProperty(ref _RightText, string.IsNullOrWhiteSpace(value) ? " " : value);
+    }
+
+    #endregion RightText
 }

@@ -1,13 +1,13 @@
 ﻿<vmu:FrameworkWindow
     x:Class="Shipwreck.PrimagiBrowser.Views.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:vmu="http://schema.shipwreck.jp/viewmodel-utils/"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:vmu="http://schema.shipwreck.jp/viewmodel-utils/"
     xmlns:vm="clr-namespace:Shipwreck.PrimagiBrowser.ViewModels"
     xmlns:v="clr-namespace:Shipwreck.PrimagiBrowser.Views"
-    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     mc:Ignorable="d"
     Title="MainWindow"
     Height="720"
@@ -48,7 +48,14 @@
         </mah:MetroTabControl>
         <StatusBar
             Grid.Row="1">
-            <StatusBarItem />
+            <StatusBarItem>
+                <TextBlock
+                    Text="{Binding SelectedTab.LeftText}" />
+            </StatusBarItem>
+            <StatusBarItem>
+                <TextBlock
+                    Text="{Binding SelectedTab.RightText}" />
+            </StatusBarItem>
         </StatusBar>
     </Grid>
 </vmu:FrameworkWindow>

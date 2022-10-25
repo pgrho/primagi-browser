@@ -114,17 +114,29 @@ public sealed class PhotoListTabViewModel : TabViewModelBase
 
         var ps = await db.Photo!.Include(e => e.Character)
                         .Where(e => min <= e.PlayDate && e.PlayDate < max)
-                        .OrderByDescending(e => e.PlayDate)
-                        .ThenByDescending(e => e.Seq)
                         .ToListAsync();
 
         lock (PhotoList)
         {
-            PhotoList.Set(ps.Select(e => new PhotoViewModel(this, e)));
+            PhotoList.Set(Order(ps.Select(e => new PhotoViewModel(this, e))));
+            InvalidateLeftText();
         }
 
         Enqueue(ps);
     }
+
+    private void InvalidateLeftText()
+    {
+        LeftText = $"画像: {PhotoList.Count}件";
+    }
+
+    private void InvalidateRightText()
+    {
+        RightText = _DownloadQueue.Any() ? $"ダウンロード中: {_DownloadQueue.Count}件" : " ";
+    }
+
+    private static IOrderedEnumerable<PhotoViewModel> Order(IEnumerable<PhotoViewModel> source)
+        => source.OrderByDescending(e => e.PlayDate).ThenByDescending(e => e.Seq);
 
     #endregion PhotoList
 
@@ -178,11 +190,14 @@ public sealed class PhotoListTabViewModel : TabViewModelBase
                     {
                         if (!PhotoList.Any(e => e.CharacterId == p.CharacterId && e.Seq == p.Seq))
                         {
-                            PhotoList.Add(new PhotoViewModel(this, p));
+                            PhotoList.Set(Order(PhotoList.Append(new PhotoViewModel(this, p))));
+                            InvalidateLeftText();
                         }
                     }
                 }
             }
+
+            InvalidateRightText();
 
             var t = _DownloadTask;
 
@@ -191,7 +206,7 @@ public sealed class PhotoListTabViewModel : TabViewModelBase
                 case TaskStatus.WaitingForActivation:
                 case TaskStatus.WaitingToRun:
                 case TaskStatus.Running:
-                    break;
+                    return;
             }
 
             _DownloadTask = DownloadAsync();
@@ -207,6 +222,7 @@ public sealed class PhotoListTabViewModel : TabViewModelBase
             PhotoRecord? p;
             lock (_DownloadQueue)
             {
+                InvalidateRightText();
                 if (!_DownloadQueue.Any())
                 {
                     return;
@@ -245,7 +261,7 @@ public sealed class PhotoListTabViewModel : TabViewModelBase
                     {
                         pd = ldt ?? pd;
                     }
-                    var fi = new FileInfo(System.IO.Path.Combine(bp, string.Format("{1:yyyy-MM-dd}/{1:HHmmss}-{0}-{2}.jpg", p.Seq, pd, cvm?.Name ?? p.CharacterId.ToString())));
+                    var fi = new FileInfo(System.IO.Path.Combine(bp, string.Format("{1:yyyy-MM-dd}/{1:yyyyMMddHHmmss}-{0}-{2}.jpg", p.Seq, pd, cvm?.Name ?? p.CharacterId.ToString())));
 
                     if (!fi.Directory!.Exists)
                     {
@@ -266,7 +282,7 @@ public sealed class PhotoListTabViewModel : TabViewModelBase
 
                     res.EnsureSuccessStatusCode();
 
-                    var fi = new FileInfo(System.IO.Path.Combine(bp, string.Format("{1:yyyy-MM-dd}/{1:HHmmss}-{0}-{2}_thumb.jpg", p.Seq, pd, cvm?.Name ?? p.CharacterId.ToString())));
+                    var fi = new FileInfo(System.IO.Path.Combine(bp, string.Format("{1:yyyy-MM-dd}/{1:yyyyMMddHHmmss}-{0}-{2}_thumb.jpg", p.Seq, pd, cvm?.Name ?? p.CharacterId.ToString())));
 
                     if (!fi.Directory!.Exists)
                     {
@@ -297,9 +313,22 @@ public sealed class PhotoListTabViewModel : TabViewModelBase
 
                         lock (PhotoList)
                         {
-                            PhotoList.FirstOrDefault(e => e.CharacterId == p.CharacterId && e.Seq == p.Seq)?.Set(ep);
+                            if (PhotoList.FirstOrDefault(e => e.CharacterId == p.CharacterId && e.Seq == p.Seq) is PhotoViewModel pvm)
+                            {
+                                pvm.Set(ep);
+
+                                var newList = Order(PhotoList).ToList();
+                                if (!newList.SequenceEqual(PhotoList))
+                                {
+                                    PhotoList.Set(newList);
+                                }
+                            }
                         }
                     }
+                }
+                else
+                {
+                    continue;
                 }
             }
             catch (Exception ex)
