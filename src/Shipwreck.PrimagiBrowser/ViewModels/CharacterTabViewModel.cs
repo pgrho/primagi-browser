@@ -121,7 +121,7 @@ public sealed class CharacterTabViewModel : TabViewModelBase
 
         var newItems = new List<PhotoRecord>();
 
-        foreach (var p in res.Data.PhotoDataList)
+        foreach (var p in res.Data.PhotoDataList!)
         {
             if (p.PhotoSeq != null
                 && p.ImageUrl != null
@@ -149,4 +149,32 @@ public sealed class CharacterTabViewModel : TabViewModelBase
 
         return newItems;
     }
+
+    #region DeleteAsync
+
+    public override bool CanDelete => true;
+
+    public override async Task<bool> DeleteAsync()
+    {
+        using var db = await BrowserDbContext.CreateDbAsync();
+
+        var ch = await db.Characters!.FindAsync(_Id);
+
+        if (ch == null)
+        {
+            return false;
+        }
+
+        db.Coordinates!.RemoveRange(await db.Coordinates.Where(e => e.CharacterId == _Id).ToListAsync());
+        var ps = await db.Photo!.Where(e => e.CharacterId == _Id).ToListAsync();
+        db.Photo!.RemoveRange(ps);
+
+        db.Characters.Remove(ch);
+
+        await db.SaveChangesAsync();
+
+        return true;
+    }
+
+    #endregion DeleteAsync
 }

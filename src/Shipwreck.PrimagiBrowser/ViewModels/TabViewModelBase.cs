@@ -47,4 +47,35 @@ public abstract class TabViewModelBase : ObservableModel
     }
 
     #endregion RightText
+
+    #region DeleteCommand
+
+    private CommandViewModelBase? _DeleteCommand;
+
+    public CommandViewModelBase DeleteCommand
+        => _DeleteCommand ??= CommandViewModel.CreateAsync(async () =>
+        {
+            try
+            {
+                if (!CanDelete || !await Window.ConfirmAsync(Title + "を削除します。よろしいでしょうか？"))
+                {
+                    return;
+                }
+
+                if (await DeleteAsync())
+                {
+                    Window.Tabs.Remove(this);
+                    Window.SelectedTab = Window.AddNewTab;
+                }
+            }
+            catch
+            {
+            }
+        }, isVisible: CanDelete, isEnabled: CanDelete, icon: "fas fa-times", style: BorderStyle.Danger, title: "削除");
+
+    public virtual bool CanDelete => false;
+
+    public virtual Task<bool> DeleteAsync() => Task.FromResult(false);
+
+    #endregion DeleteCommand
 }
