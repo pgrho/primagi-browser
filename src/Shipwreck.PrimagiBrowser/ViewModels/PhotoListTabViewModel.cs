@@ -60,17 +60,38 @@ public sealed class PhotoListTabViewModel : TabViewModelBase
 
     #endregion SelectedMonth
 
-    #region _Characters
+    #region Characters
 
-    private readonly Dictionary<int, CharacterViewModel> _Characters = new();
+    private readonly Dictionary<int, PhotoListCharacterViewModel> _Characters = new();
+    private BulkUpdateableCollection<PhotoListCharacterViewModel>? _CharacterList;
 
-    internal CharacterViewModel GetOrCreate(CharacterRecord character)
+    public BulkUpdateableCollection<PhotoListCharacterViewModel> Characters
+    {
+        get
+        {
+            if (_CharacterList == null)
+            {
+                lock (_Characters)
+                {
+                    _CharacterList = new(_Characters.Values.OrderBy(e => e.Id));
+                    BindingOperations.EnableCollectionSynchronization(_CharacterList, _Characters);
+                }
+            }
+            return _CharacterList;
+        }
+    }
+
+    internal PhotoListCharacterViewModel GetOrCreate(CharacterRecord character)
     {
         lock (_Characters)
         {
             if (!_Characters.TryGetValue(character.Id, out var vm))
             {
-                _Characters[character.Id] = vm = new CharacterViewModel(character);
+                _Characters[character.Id] = vm = new PhotoListCharacterViewModel(this, character);
+                if (_CharacterList != null)
+                {
+                    _CharacterList.Set(_CharacterList.Append(vm).OrderBy(e => e.Id).ToList());
+                }
             }
             return vm;
         }
@@ -86,7 +107,7 @@ public sealed class PhotoListTabViewModel : TabViewModelBase
         }
     }
 
-    #endregion _Characters
+    #endregion Characters
 
     #region PhotoList
 
@@ -106,15 +127,17 @@ public sealed class PhotoListTabViewModel : TabViewModelBase
         }
     }
 
-    private async void BeginLoadPhoto()
+    internal async void BeginLoadPhoto()
     {
         var min = SelectedMonth.ToDateTime(default);
         var max = min.AddMonths(1);
 
+        var cids = Characters.Any() ? Characters.Where(e => e.IsSelected).Select(e => e.Id).ToList() : null;
+
         using var db = await BrowserDbContext.CreateDbAsync();
 
         var ps = await db.Photo!.Include(e => e.Character)
-                        .Where(e => min <= e.PlayDate && e.PlayDate < max)
+                        .Where(e => min <= e.PlayDate && e.PlayDate < max && (cids == null || cids.Contains(e.CharacterId)))
                         .ToListAsync();
 
         lock (PhotoList)
@@ -189,7 +212,9 @@ public sealed class PhotoListTabViewModel : TabViewModelBase
                 {
                     lock (PhotoList)
                     {
-                        if (!PhotoList.Any(e => e.CharacterId == p.CharacterId && e.Seq == p.Seq))
+                        if (p.Character != null
+                            && GetOrCreate(p.Character)?.IsSelected == true
+                            && !PhotoList.Any(e => e.CharacterId == p.CharacterId && e.Seq == p.Seq))
                         {
                             PhotoList.Set(Order(PhotoList.Append(new PhotoViewModel(this, p))));
                             InvalidateLeftText();
