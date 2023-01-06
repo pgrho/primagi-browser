@@ -97,7 +97,7 @@ public sealed class PhotoListTabViewModel : TabViewModelBase
         }
     }
 
-    internal CharacterViewModel? GetById(int characterId)
+    internal PhotoListCharacterViewModel? GetById(int characterId)
     {
         lock (_Characters)
         {
@@ -204,22 +204,23 @@ public sealed class PhotoListTabViewModel : TabViewModelBase
             foreach (var p in records)
             {
                 _DownloadQueue.Enqueue(p);
+            }
 
+            lock (PhotoList)
+            {
                 var m = SelectedMonth;
+                var ns = records.GroupBy(e => new { e.Character, e.Seq })
+                                .Select(e => e.First())
+                                .Where(p => p.PlayDate.Year == m.Year
+                                        && p.PlayDate.Month == m.Month
+                                        && GetById(p.CharacterId)?.IsSelected == true
+                                        && !PhotoList.Any(e => e.CharacterId == p.CharacterId && e.Seq == p.Seq))
+                                .ToList();
 
-                if (p.PlayDate.Year == m.Year
-                    && p.PlayDate.Month == m.Month)
+                if (ns.Any())
                 {
-                    lock (PhotoList)
-                    {
-                        if (p.Character != null
-                            && GetOrCreate(p.Character)?.IsSelected == true
-                            && !PhotoList.Any(e => e.CharacterId == p.CharacterId && e.Seq == p.Seq))
-                        {
-                            PhotoList.Set(Order(PhotoList.Append(new PhotoViewModel(this, p))));
-                            InvalidateLeftText();
-                        }
-                    }
+                    PhotoList.Set(Order(PhotoList.Concat(ns.Select(p => new PhotoViewModel(this, p)))));
+                    InvalidateLeftText();
                 }
             }
 
