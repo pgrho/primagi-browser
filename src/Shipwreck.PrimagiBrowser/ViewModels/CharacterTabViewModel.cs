@@ -56,7 +56,7 @@ public sealed class CharacterTabViewModel : TabViewModelBase
     public async void HandleApiResponse(string uri, IEnumerable<KeyValuePair<string, string>> requestHeaders, string? requestContent, string responseContent)
     {
         var luk = GetLoginUserKey(requestHeaders);
-        if (luk != _LoginUserKey)
+        if (luk == null)
         {
             return;
         }
@@ -109,7 +109,7 @@ public sealed class CharacterTabViewModel : TabViewModelBase
     internal async Task<List<PhotoRecord>> HandlePhotoDataListAsync(IEnumerable<KeyValuePair<string, string>> requestHeaders, ApiResponse<PhotoDataListData> res)
     {
         var luk = GetLoginUserKey(requestHeaders);
-        if (luk != _LoginUserKey)
+        if (luk == null)
         {
             return new(0);
         }
