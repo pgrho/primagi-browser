@@ -132,9 +132,18 @@ public sealed class PhotoListTabViewModel : TabViewModelBase
         var min = SelectedMonth.ToDateTime(default);
         var max = min.AddMonths(1);
 
-        var cids = Characters.Any() ? Characters.Where(e => e.IsSelected).Select(e => e.Id).ToList() : null;
+        var cids = Characters.Select(e => e.Id).ToList();
 
         using var db = await BrowserDbContext.CreateDbAsync();
+
+        var cs = await db.Photo!.Where(e => min <= e.PlayDate && e.PlayDate < max && !cids.Contains(e.CharacterId)).Select(e => e.Character).Distinct().ToListAsync();
+
+        foreach(var c in cs)
+        {
+            GetOrCreate(c);
+        }
+
+        cids = Characters.Any() ? Characters.Where(e => e.IsSelected).Select(e => e.Id).ToList() : null;
 
         var ps = await db.Photo!.Include(e => e.Character)
                         .Where(e => min <= e.PlayDate && e.PlayDate < max && (cids == null || cids.Contains(e.CharacterId)))
