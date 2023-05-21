@@ -14,6 +14,9 @@ public class CharacterRecord
     [StringLength(6)]
     public string CharacterName { get; set; } = string.Empty;
 
+    [StringLength(12)]
+    public string? DisplayName { get; set; }
+
     public byte BirthMonth { get; set; }
 
     public byte BirthDate { get; set; }
@@ -28,6 +31,7 @@ public class CharacterRecord
         => CharacterName != null
         && CardId != null
         && 1 <= BirthMonth && BirthMonth <= 12
+        && !(DisplayName?.Length > 12)
         && 1 <= BirthDate && BirthDate <= DateTime.DaysInMonth(2020, BirthMonth)
         && Regex.IsMatch(CharacterName, "^.{1,6}$")
         && Regex.IsMatch(CardId, "^[A-Z0-9]{7}-[A-Z0-9]{7}$");

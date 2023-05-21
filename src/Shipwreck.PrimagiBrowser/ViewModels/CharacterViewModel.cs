@@ -9,8 +9,10 @@ public class CharacterViewModel : ObservableModel
     {
         Id = record.Id;
         Name = record.CharacterName;
+        DisplayName = record.DisplayName?.Length > 0 ? record.DisplayName : Name;
     }
 
     public int Id { get; }
     public string Name { get; }
+    public string DisplayName { get; }
 }

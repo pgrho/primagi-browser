@@ -13,6 +13,7 @@ public sealed class CharacterTabViewModel : TabViewModelBase
     {
         _Id = character.Id;
         CharacterName = character.CharacterName ?? throw new ArgumentException();
+        CharacterDisplayName = character.DisplayName?.Length > 0 ? character.DisplayName : CharacterName;
         BirthMonth = character.BirthMonth;
         BirthDate = character.BirthDate;
         CardId = character.CardId ?? throw new ArgumentException();
@@ -20,6 +21,7 @@ public sealed class CharacterTabViewModel : TabViewModelBase
 
     private readonly int _Id;
     public string CharacterName { get; }
+    public string CharacterDisplayName { get; }
     public byte BirthMonth { get; }
     public byte BirthDate { get; }
     internal readonly string CardId;

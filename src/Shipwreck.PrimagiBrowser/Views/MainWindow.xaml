@@ -10,7 +10,7 @@
     xmlns:vm="clr-namespace:Shipwreck.PrimagiBrowser.ViewModels"
     xmlns:v="clr-namespace:Shipwreck.PrimagiBrowser.Views"
     mc:Ignorable="d"
-    Title="MainWindow"
+    Title="PM Browser"
     Height="720"
     Width="1280"
     d:DataContext="{d:DesignInstance Type=vm:MainWindowViewModel, IsDesignTimeCreatable=False}">
